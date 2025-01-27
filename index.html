@@ -53,9 +53,19 @@
         canvas.width = scratchCard.offsetWidth;
         canvas.height = scratchCard.offsetHeight;
 
-        // 設置中獎機率（例如 30% 中獎）
-        const isWinner = Math.random() < 0.3;
-        message.innerText = isWinner ? "🎉 恭喜中獎！🎉" : "再接再厲！";
+        // 設置中獎機率和限制中獎次數
+        const totalPrizes = 10; // 總共發放的紅包數量
+        let prizesGiven = 0; // 已發放的紅包數量
+
+        const isWinner = () => {
+            if (prizesGiven < totalPrizes && Math.random() < 0.3) {
+                prizesGiven++;
+                return true;
+            }
+            return false;
+        };
+
+        message.innerText = isWinner() ? "🎉 恭喜中獎！🎉" : "再接再厲！";
 
         // 初始化覆蓋層
         ctx.fillStyle = "silver";
