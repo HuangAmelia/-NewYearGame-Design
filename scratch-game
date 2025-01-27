@@ -59,9 +59,7 @@
 
         let isScratching = false;
 
-        canvas.addEventListener("mousedown", () => (isScratching = true));
-        canvas.addEventListener("mouseup", () => (isScratching = false));
-        canvas.addEventListener("mousemove", (e) => {
+        const scratch = (e) => {
             if (!isScratching) return;
 
             const rect = canvas.getBoundingClientRect();
@@ -72,7 +70,11 @@
             ctx.beginPath();
             ctx.arc(x, y, 20, 0, Math.PI * 2);
             ctx.fill();
-        });
+        };
+
+        canvas.addEventListener("mousedown", () => (isScratching = true));
+        canvas.addEventListener("mouseup", () => (isScratching = false));
+        canvas.addEventListener("mousemove", scratch);
 
         // 清除一定範圍的銀色層後顯示訊息
         canvas.addEventListener("mouseup", () => {
@@ -91,4 +93,3 @@
     </script>
 </body>
 </html>
-
