@@ -40,7 +40,7 @@
     <h1>線上刮刮樂</h1>
     <p>刮開銀色區域看看您的結果！</p>
     <div class="scratch-card">
-        <div class="hidden-message" id="prize-message">🎉 恭喜中獎！🎉</div>
+        <div class="hidden-message" id="prize-message"></div>
         <canvas class="scratch-overlay" id="scratch-area"></canvas>
     </div>
 
@@ -51,4 +51,49 @@
         const scratchCard = canvas.parentElement;
 
         canvas.width = scratchCard.offsetWidth;
-        canvas
+        canvas.height = scratchCard.offsetHeight;
+
+        // 設置中獎機率（例如 30% 中獎）
+        const isWinner = Math.random() < 0.3;
+        message.innerText = isWinner ? "🎉 恭喜中獎！🎉" : "再接再厲！";
+
+        // 初始化覆蓋層
+        ctx.fillStyle = "silver";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let isScratching = false;
+
+        const scratch = (e) => {
+            if (!isScratching) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        canvas.addEventListener("mousedown", () => (isScratching = true));
+        canvas.addEventListener("mouseup", () => (isScratching = false));
+        canvas.addEventListener("mousemove", scratch);
+
+        // 清除一定範圍的銀色層後顯示訊息
+        canvas.addEventListener("mouseup", () => {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let cleared = 0;
+
+            for (let i = 0; i < imgData.data.length; i += 4) {
+                if (imgData.data[i + 3] === 0) cleared++;
+            }
+
+            if (cleared / (canvas.width * canvas.height) > 0.5) {
+                canvas.style.display = "none";
+                alert(message.innerText);
+            }
+        });
+    </script>
+</body>
+</html>
