@@ -51,8 +51,8 @@
         const message = document.getElementById("prize-message");
         const scratchCard = canvas.parentElement;
 
-        canvas.width = scratchCard.offsetWidth;
-        canvas.height = scratchCard.offsetHeight;
+        canvas.width = scratchCard.clientWidth;
+        canvas.height = scratchCard.clientHeight;
 
         // 設置中獎機率和限制中獎次數
         const totalPrizes = 20; // 總共發放的中獎紅包數量
