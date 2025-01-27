@@ -5,59 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>線上刮刮樂</title>
     <style>
-        /* CSS樣式，您可以根據喜好調整 */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px auto;
-        }
         .scratch-card {
+            position: relative;
             width: 300px;
             height: 150px;
-            background-color: #ddd;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            border: 1px solid #ccc;
         }
         #scratch-area {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            cursor: pointer;
         }
         .hidden-message {
-            font-size: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
             font-weight: bold;
-            padding: 20px;
-            text-align: center;
+            color: #fff;
             display: none;
         }
     </style>
 </head>
 <body>
-    <h1>線上刮刮樂</h1>
-    <p>刮開銀色區域看看您的結果！</p>
     <div class="scratch-card">
         <canvas id="scratch-area"></canvas>
         <div class="hidden-message" id="prize-message"></div>
     </div>
 
     <script>
-        // ... (其他程式碼與之前相同)
+        const canvas = document.getElementById('scratch-area');
+        const ctx = canvas.getContext('2d');
+        const message = document.getElementById('prize-message');
 
-        // 中獎判斷函數
-        function isWinner() {
-            if (prizesGiven >= totalPrizes) {
-                return false; // 紅包已發完
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+
+        ctx.fillStyle = 'silver';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let isScratching = false;
+        let clearedPixels = 0;
+        const totalPixels = canvas.width * canvas.height;
+        const revealThreshold = 0.5;
+
+        // 中獎設定
+        const totalPrizes = 20;
+        const totalAttempts = 40;
+        let prizesGiven = 0;
+        let attempts = 0;
+
+        function scratch(e) {
+            if (!isScratching) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // 重置變換矩陣
+
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fill();
+
+            // 計算已刮除像素
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < imgData.data.length; i += 4) {
+                if (imgData.data[i + 3] === 0) {
+                    clearedPixels++;
+                }
             }
-            attempts++;
-            return Math.random() < 0.5; // 中獎機率為50%
+
+            // 判斷是否顯示結果
+            if (clearedPixels / totalPixels >= revealThreshold) {
+                revealMessage(isWinner());
+            }
         }
 
-        // 顯示結果
-        function revealMessage(isWin) {
-            message.textContent = isWin ? '恭喜中獎！' : '很抱歉，紅包已發完！';
-            message.style.display = 'block';
-            canvas.style.pointerEvents = 'none'; // 避免再次刮擦
+        function isWinner() {
+            // ... (中獎判斷邏輯)
         }
+
+        function revealMessage(isWin) {
+            message.textContent = isWin ? '恭喜中獎！' : '很抱歉，您未中獎！';
+            message.style.display = 'block';
+        }
+
+        canvas.addEventListener('mousedown', () => {
+            isScratching = true;
+        });
+        canvas.addEventListener('mouseup', () => {
+            isScratching = false;
+        });
+        canvas.addEventListener('mousemove', scratch);
     </script>
 </body>
 </html>
